@@ -1,11 +1,12 @@
 classdef animator < handle
     properties
-        % origin;
-        % offset (3,1) double = [NaN; NaN; NaN];
+        origin (1,:) animator;
+        offset (1,1,3) double;
         graphic;
         pointdata (:, :, 3) double;
-        pos_terp (1,1) griddedInterpolant;
-        rot_terp (1,1) griddedInterpolant;
+        position (1,1) griddedInterpolant;
+        orientation (1,1) griddedInterpolant;
+        end_time (1,1) double = 0;
     end
 
     methods
@@ -13,26 +14,65 @@ classdef animator < handle
             arguments
                 graphic handle;
                 motion.position timetable = timetable;
-                motion.rotation timetable = timetable;
+                motion.orientation timetable = timetable;
+                motion.origin = animator.empty(1,0);
+                motion.offset (3,1) double = [0; 0; 0]
             end
 
-            ani.pointdata = animator.get_vertices(graphic);
             ani.graphic = graphic;
-            opts = {"spline", "nearest"};
+            ani.pointdata = animator.get_vertices(ani.graphic);
+            ani.set_position(motion.position);
+            ani.set_orientation(motion.orientation);
+            ani.origin = motion.origin;
+            ani.offset = motion.offset;
+        end
 
-            if isempty(motion.position)
-                ani.pos_terp = griddedInterpolant([0 1e-10]', zeros(2,3), opts{:});
-            else
-                ani.pos_terp = griddedInterpolant(seconds(motion.position.Time), ...
-                    motion.position{:, ["x", "y", "z"]}, opts{:});
+        function set_position(ani, tab)
+            arguments
+                ani (1,1) animator;
+                tab timetable;
             end
 
-            if isempty(motion.rotation)
-                ani.rot_terp = griddedInterpolant([0 1e-10]', [1 0 0 0; 1 0 0 0], opts{:});
-            else
-                ani.rot_terp = griddedInterpolant(seconds(motion.rotation.Time), ...
-                    motion.rotation{:, ["s", "i", "j", "k"]}, opts{:});
+            if isempty(tab)
+                tab = timetable(RowTimes = seconds([0 1e-10]));
             end
+
+            cols = tab.Properties.VariableNames;
+            required_cols = ["x", "y", "z"];
+            not_present = setdiff(required_cols, cols);
+            tab{:, not_present} = zeros(height(tab), length(not_present));
+
+            ani.position = griddedInterpolant(seconds(tab.Time), ...
+                tab{:, ["x", "y", "z"]}, "spline", "nearest");
+            ani.end_time = max(ani.end_time, seconds(tab.Time(end)));
+        end
+
+        function set_orientation(ani, tab)
+            arguments
+                ani (1,1) animator;
+                tab timetable;
+            end
+
+            cols = tab.Properties.VariableNames;
+            required_cols = ["s", "i", "j", "k"];
+            if isempty(cols)
+                tab = array2timetable([1 0 0 0; 1 0 0 0], ...
+                    VariableNames = required_cols, ...
+                    RowTimes = seconds([0 1e-10]));
+            elseif isscalar(cols) && (cols == "theta")
+                s = cos(tab.theta/2);
+                k = sin(tab.theta/2);
+                ij = zeros(height(tab), 2);
+                tab{:, required_cols} = [s, ij, k];
+            elseif (length(cols) == 4) && all(ismember(required_cols, cols))
+                % all good
+            else
+                error("Invalid table input");
+            end
+
+            ani.orientation = griddedInterpolant(seconds(tab.Time), ...
+                tab{:, ["s", "i", "j", "k"]}, "spline", "nearest");
+            ani.end_time = max(ani.end_time, seconds(tab.Time(end)));
         end
 
         function vertices = compute_vertices(ani, vertices, time)
@@ -42,31 +82,39 @@ classdef animator < handle
                 time (1,1) double
             end
 
-            quat = ani.rot_terp(time);
+            quat = ani.orientation(time);
             direction = animator.quat_to_direction(quat);
             vertices = tensorprod(direction, vertices, 2, 3);
             % tensor-product outputs 3xMxN for MxNx3 <vertices> input, 
             % but setting (1xMxN) that should be last
             vertices = permute(vertices, [2 3 1]);
             % position is (Tx3) when queried -- move 3 to the page dimension
-            position = ani.pos_terp(time);
+            position = ani.position(time);
             vertices = vertices + permute(position, [1 3 2]);
+
+            if ~isempty(ani.origin)
+                vertices = vertices + ani.origin.compute_vertices(ani.offset, time);
+            end
         end
 
-        function animate(ani)
+        function animate(anis, rate)
             arguments
-                ani animator;
+                anis (1,:) animator;
+                rate (1,1) double = 1;
             end
 
-            t_end = max(ani.pos_terp.GridVectors{1}(end), ani.rot_terp.GridVectors{1}(end));
+            t_end = max([anis.end_time]);
             start = tic;
-            while (isvalid(ani.graphic))
-                time = toc(start);
+            while true
+                time = toc(start)*rate;
                 if time > t_end
                     break;
                 end
-                vertices = ani.compute_vertices(ani.pointdata, time);
-                animator.set_vertices(ani.graphic, vertices);
+                for i = 1:length(anis)
+                    ani = anis(i);
+                    vertices = ani.compute_vertices(ani.pointdata, time);
+                    animator.set_vertices(ani.graphic, vertices);
+                end
                 drawnow;
             end
         end
