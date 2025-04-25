@@ -8,6 +8,9 @@ vehicle_weight = vehicle_mass * grav;
 principal_moments = [3085, 20001, 23989] * uconv(u.lbf * u.s^2 * u.in, u.kg * u.m^2);
 vehicle_inertia = diag(principal_moments);
 
+wheel_radius = 0.3;
+wheel_inertia = 0.8;
+
 cg_to_front = 39.7 * uconv(u.in, u.m);
 cg_to_rear = 65.41 * uconv(u.in, u.m);
 cg_to_road = 22.05 * uconv(u.in, u.m);
@@ -29,6 +32,8 @@ patch_leftfront = [cg_to_front, base_width/2, -cg_to_road - eql_front_defl];
 patch_rightfront = [cg_to_front, -base_width/2, -cg_to_road - eql_front_defl];
 patch_leftrear = [-cg_to_rear, base_width/2, -cg_to_road - eql_rear_defl];
 patch_rightrear = [-cg_to_rear, -base_width/2, -cg_to_road - eql_rear_defl];
+
+min_velocity = 1e-3;
 
 function ufactor = uconv(nat, tar)
     ufactor = double(unitConversionFactor(nat, tar));
