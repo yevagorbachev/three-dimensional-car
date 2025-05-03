@@ -23,11 +23,11 @@ daspect([1 1 1]);
 xlim([-10 10]);
 ylim([-10 10]);
 zlim([-10 10]);
-
-bx = box3d(1, 2, 5);
-ani = animator(bx, orientation = ornt);
+bx = rigidbody.box3d(1, 2, 5);
 
 nexttile([1 2]); hold on;
 plot(logsout.Time, logsout.vehicle_spin);
 
-ani.animate(0.1);
+rb = rigidbody(bx, orientation = ornt);
+plr = player(rb);
+plr.play([0 t_f], 0.25);

@@ -11,19 +11,20 @@ x = [v*time; v*time];
 position = array2timetable(x', VariableNames = ["x", "y"], RowTimes = seconds(time));
 
 figure;
-graphic = box3d(1, 3, 0.5);
-wheel = box3d(0.25, 0.25, 0.25);
+graphic = rigidbody.box3d(1, 3, 0.5);
+wheel = rigidbody.box3d(0.25, 0.25, 0.25);
 xlabel("x");
 ylabel("y");
 zlabel("z");
 daspect([1 1 1]);
 view([-26 17])
 
-ani = animator(graphic, position = position, orientation = rotation);
-ani2 = animator(wheel, ...
+rb1 = rigidbody(graphic, position = position, orientation = rotation);
+rb2 = rigidbody(wheel, ...
     orientation = timetable(theta', VariableNames = "theta", RowTimes = seconds(time)), ...
-    origin = ani, offset = [1 3 0.5]/2);
-anis = [ani ani2];
+    origin = rb1, offset = [1 3 0.5]/2);
+plr = player([rb1 rb2]);
+plr.play([min(time) max(time)], 1);
 
 xlim([0 10]);
 ylim([0 10]);

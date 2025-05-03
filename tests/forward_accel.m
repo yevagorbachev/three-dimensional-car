@@ -39,7 +39,6 @@ xlabel("x");
 ylabel("y");
 grid on;
 
-bx = box3d([cg_to_front cg_to_rear], base_width, [cg_to_road vehicle_height - cg_to_road]);
 
 vecornt = quatinv(logsout.("vehicle.ornt"));
 ornt = array2timetable(vecornt, RowTimes = logsout.Time, ...
@@ -47,4 +46,10 @@ ornt = array2timetable(vecornt, RowTimes = logsout.Time, ...
 pos = array2timetable(logsout.("vehicle.pos"), RowTimes = logsout.Time, ...
     VariableNames = ["x", "y", "z"]);
 
-ani = animator(bx, position = pos, orientation = ornt);
+bx = rigidbody.box3d([cg_to_front cg_to_rear], base_width, ...
+    [cg_to_road vehicle_height - cg_to_road]);
+rb = rigidbody(bx, position = pos, orientation = ornt);
+plr = player(rb);
+
+plr.play([0 t_f], 0.5);
+
