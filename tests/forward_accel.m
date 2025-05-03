@@ -28,28 +28,11 @@ logsout = extractTimetable(simout.logsout);
 
 figure; 
 
-sz = 10;
-hold on;
-view(-50,30);
-daspect([1 1 1]);
-xlim([-sz sz]);
-ylim([-sz sz]);
-zlim([0 10]);
-xlabel("x");
-ylabel("y");
-grid on;
-
-
-vecornt = quatinv(logsout.("vehicle.ornt"));
-ornt = array2timetable(vecornt, RowTimes = logsout.Time, ...
-    VariableNames = ["s", "i", "j", "k"]);
-pos = array2timetable(logsout.("vehicle.pos"), RowTimes = logsout.Time, ...
-    VariableNames = ["x", "y", "z"]);
-
 bx = rigidbody.box3d([cg_to_front cg_to_rear], base_width, ...
     [cg_to_road vehicle_height - cg_to_road]);
-rb = rigidbody(bx, position = pos, orientation = ornt);
-plr = player(rb);
 
+[rb, cam] = car_player(bx, logsout, zlim = [-cg_to_road 2.5]);
+
+plr = player([rb, cam]);
 plr.play([0 t_f], 0.5);
 

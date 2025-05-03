@@ -1,5 +1,5 @@
 classdef rigidbody < playable
-    properties
+    properties (Access = protected)
         pointdata (:, :, 3) double;
         position (1,1) griddedInterpolant;
         orientation (1,1) griddedInterpolant;
@@ -29,6 +29,40 @@ classdef rigidbody < playable
             body.offset = motion.offset;
         end
 
+        function vertices = compute_vertices(body, vertices, time)
+            arguments
+                body rigidbody;
+                vertices (:, :, 3) double;
+                time (1,1) double
+            end
+
+            quat = body.orientation(time);
+            direction = rigidbody.quat_to_direction(quat);
+            vertices = tensorprod(direction, vertices, 2, 3);
+            % tensor-product outputs 3xMxN for MxNx3 <vertices> input, 
+            % but setting (1xMxN) that should be last
+            vertices = permute(vertices, [2 3 1]);
+            % position is (Tx3) when queried -- move 3 to the page dimension
+            position = body.position(time);
+            vertices = vertices + permute(position, [1 3 2]);
+
+            if ~isempty(body.origin)
+                vertices = vertices + body.origin.compute_vertices(body.offset, time);
+            end
+        end
+
+        function render(body, time)
+            arguments (Input)
+                body (1,1) rigidbody;
+                time (1,1) double;
+            end
+
+            vt = body.compute_vertices(body.pointdata, time);
+            body.vertices_to_graphic(vt);
+        end
+    end
+
+    methods (Access = protected)
         function set_position_data(body, tab)
             arguments
                 body (1,1) rigidbody;
@@ -94,40 +128,6 @@ classdef rigidbody < playable
                 tab{:, ["x", "y", "z"]}, "spline", "nearest");
         end
 
-        function vertices = compute_vertices(body, vertices, time)
-            arguments
-                body rigidbody;
-                vertices (:, :, 3) double;
-                time (1,1) double
-            end
-
-            quat = body.orientation(time);
-            direction = rigidbody.quat_to_direction(quat);
-            vertices = tensorprod(direction, vertices, 2, 3);
-            % tensor-product outputs 3xMxN for MxNx3 <vertices> input, 
-            % but setting (1xMxN) that should be last
-            vertices = permute(vertices, [2 3 1]);
-            % position is (Tx3) when queried -- move 3 to the page dimension
-            position = body.position(time);
-            vertices = vertices + permute(position, [1 3 2]);
-
-            if ~isempty(body.origin)
-                vertices = vertices + body.origin.compute_vertices(body.offset, time);
-            end
-        end
-
-        function render(body, time)
-            arguments (Input)
-                body (1,1) rigidbody;
-                time (1,1) double;
-            end
-
-            vt = body.compute_vertices(body.pointdata, time);
-            body.vertices_to_graphic(vt);
-        end
-    end
-
-    methods (Access = protected)
         function vertices = vertices_from_graphic(body)
             arguments (Input)
                 body (1,1) rigidbody;
