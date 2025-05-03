@@ -1,24 +1,22 @@
 params;
 
-t_f = 10;
+t_f = 15;
 mdl = "vehicle";
 
-vehicle_pos_0 = [0; 0; cg_to_road];
-vehicle_vel_0 = [10; 0; 0];
+vehicle_pos_0 = [-10; -10; cg_to_road + 0.2];
+vehicle_vel_0 = [5; 0; 0];
 vehicle_spin_0 = [0; 0; 0];
 yaw = deg2rad(0);
 pitch = deg2rad(0);
 roll = deg2rad(0);
 vehicle_ornt_0 = quatinv(angle2quat(yaw, pitch, roll))';
 
-steer_time = 0;
-torque_time = 2;
-front_steer = deg2rad([20 20]);
-% front_steer = [0 0];
+torque_time = 0;
+steer_time = 2;
+% front_steer = deg2rad([20 20]);
+front_steer = deg2rad([10 10]);
 % front_torque = [100 100];
 front_torque = [-100 -100];
-
-% front_torque = [0 0];
 rear_steer = [0 0];
 rear_torque = [0 0];
 friction = true;
@@ -28,7 +26,7 @@ logsout = extractTimetable(simout.logsout);
 
 figure; 
 
-sz = 10;
+sz = 20;
 hold on;
 view(-50,30);
 daspect([1 1 1]);

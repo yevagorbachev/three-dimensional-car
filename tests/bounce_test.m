@@ -1,6 +1,6 @@
 params;
 
-t_f = 3;
+t_f = 5;
 mdl = "vehicle";
 
 vehicle_pos_0 = [0; 0; 1.5];
