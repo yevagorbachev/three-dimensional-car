@@ -1,4 +1,4 @@
-classdef playable < handle
+classdef playable < handle & matlab.mixin.Heterogeneous
     properties (GetAccess = public, SetAccess = protected)
         graphic
     end

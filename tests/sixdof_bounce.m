@@ -24,15 +24,15 @@ logsout = extractTimetable(simout.logsout);
 
 figure; 
 
+tiledlayout(1,2);
+
+nexttile;
 hold on;
+grid on;
 view(-50,30);
 daspect([1 1 1]);
-xlim([-10 10]);
-ylim([-10 10]);
-zlim([0 10]);
-xlabel("x");
-ylabel("y");
-grid on;
+xlim([-5 5]); ylim([-5 5]); zlim([-0.1 2.5]);
+xlabel("x"); ylabel("y"); zlabel("z");
 
 vecornt = quatinv(logsout.("vehicle.ornt"));
 ornt = array2timetable(vecornt, RowTimes = logsout.Time, ...
@@ -43,5 +43,14 @@ pos = array2timetable(logsout.("vehicle.pos"), RowTimes = logsout.Time, ...
 bx = rigidbody.box3d([cg_to_front cg_to_rear], base_width, ...
     [cg_to_road vehicle_height - cg_to_road]);
 rb = rigidbody(bx, position = pos, orientation = ornt);
-plr = player(rb);
+
+nexttile; hold on; grid on;
+yline(vehicle_mass * grav/4, "--k", Label = "W/4", HandleVisibility = "off");
+sp_lf = signalplayer(plot(logsout.Time, logsout.("leftfront.load"), DisplayName = "LF")); 
+sp_rf = signalplayer(plot(logsout.Time, logsout.("rightfront.load"), DisplayName = "RF"));
+sp_lr = signalplayer(plot(logsout.Time, logsout.("leftrear.load"), DisplayName = "LR"));
+sp_rr = signalplayer(plot(logsout.Time, logsout.("rightrear.load"), DisplayName = "RR"));
+legend;
+
+plr = player([rb sp_lf sp_rf sp_lr sp_rr]);
 plr.play([0 t_f], 1);
