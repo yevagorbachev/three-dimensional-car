@@ -38,9 +38,8 @@ classdef player < handle
                 if tm > plr.end_time
                     plr.ticker.stop;
                 end
-                for tar = plr.targets
-                    tar.render(tm);
-                end
+                plr.render(tm);
+                drawnow;
             end
 
             function timer_stop_fcn(timer, event)
@@ -70,6 +69,37 @@ classdef player < handle
 
         function stop(plr)
             plr.ticker.stop;
+        end
+
+        function record(plr, writer, timespec)
+            arguments
+                plr player;
+                writer (1,1) VideoWriter;
+                timespec (1,3) double;
+            end
+            
+            if timespec(3) < timespec(1)
+                error("Video must start before it ends");
+            end
+            video_time = timespec(1):(timespec(2)/writer.FrameRate):timespec(3);
+
+            open(writer);
+            oc = onCleanup(@() close(writer));
+
+            active_fig = plr.fig;
+            figure(active_fig);
+            for i_frame = 1:length(video_time)
+                plr.render(video_time(i_frame));
+                drawnow;
+                frame = getframe(active_fig);
+                writer.writeVideo(frame);
+            end
+        end
+
+        function render(plr, time)
+            for tar = plr.targets
+                tar.render(time);
+            end
         end
 
         function tm = get.time(plr)

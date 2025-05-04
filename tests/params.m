@@ -15,6 +15,7 @@ cg_to_front = 39.7 * uconv(u.in, u.m);
 cg_to_rear = 65.41 * uconv(u.in, u.m);
 cg_to_road = 22.05 * uconv(u.in, u.m);
 base_width = 58.7 * uconv(u.in, u.m);
+% base_width = 30 * uconv(u.in, u.m);
 % vehicle_height = 57.9 * uconv(u.in, u.m);
 vehicle_height = 1;
 
