@@ -15,7 +15,8 @@ function [rb, cam] = car_setup(box, logs, opts)
     xlim(ax, opts.xlims); ylim(ax, opts.ylims); zlim(ax, opts.zlims);
     xlabel(ax, "x [m]"); ylabel(ax, "y [m]"); zlabel(ax, "z [m]");
 
-    vecornt = quatinv(logs.("vehicle.ornt"));
+    % vecornt = quatinv(logs.("vehicle.ornt"));
+    vecornt = logs.("vehicle.ornt");
     ornt = array2timetable(vecornt, RowTimes = logs.Time, ...
         VariableNames = ["s", "i", "j", "k"]);
     pos = array2timetable(logs.("vehicle.pos"), RowTimes = logs.Time, ...

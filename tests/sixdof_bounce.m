@@ -31,7 +31,7 @@ hold on;
 grid on;
 view(-50,30);
 daspect([1 1 1]);
-xlim([-5 5]); ylim([-5 5]); zlim([-0.1 2.5]);
+xlim([-5 5]); ylim([-5 5]); zlim([-0.1 7.5]);
 xlabel("x"); ylabel("y"); zlabel("z");
 
 vecornt = quatinv(logsout.("vehicle.ornt"));
