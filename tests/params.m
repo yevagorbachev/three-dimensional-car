@@ -35,7 +35,7 @@ patch_rightfront = [cg_to_front, -base_width/2, -cg_to_road - eql_front_defl];
 patch_leftrear = [-cg_to_rear, base_width/2, -cg_to_road - eql_rear_defl];
 patch_rightrear = [-cg_to_rear, -base_width/2, -cg_to_road - eql_rear_defl];
 
-min_velocity = 1e-5;
+min_velocity = 1e-8;
 
 function ufactor = uconv(nat, tar)
     ufactor = double(unitConversionFactor(nat, tar));
