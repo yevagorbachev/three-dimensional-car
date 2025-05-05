@@ -99,5 +99,5 @@ yline(axes(1), vehicle_mass * grav/4, "--k", Label = "W/4", HandleVisibility = "
 yline(axes(2), -rad2deg(calc_sideslip), "--k", Label = "\alpha", HandleVisibility = "off")
 
 plr = player([rb, cam, traj_sp, splayers]);
-% plr.play([0 t_f], 10);
+plr.play([0 t_f], 10);
 
