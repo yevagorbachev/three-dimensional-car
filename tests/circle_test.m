@@ -11,6 +11,8 @@ pitch = deg2rad(0);
 roll = deg2rad(0);
 vehicle_ornt_0 = quatinv(angle2quat(yaw, pitch, roll))';
 
+
+
 steer_time = 1;
 torque_time = 0;
 front_steer = deg2rad([30 30]);

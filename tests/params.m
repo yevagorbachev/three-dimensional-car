@@ -9,7 +9,7 @@ principal_moments = [3085, 20001, 23989] * uconv(u.lbf * u.s^2 * u.in, u.kg * u.
 vehicle_inertia = diag(principal_moments);
 
 wheel_radius = 0.3;
-wheel_inertia = 0.8;
+wheel_inertia = 0.45;
 
 cg_to_front = 39.7 * uconv(u.in, u.m);
 cg_to_rear = 65.41 * uconv(u.in, u.m);
